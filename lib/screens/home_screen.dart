@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'package:depi/api/api_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import '../api/shared_preference_service.dart';
 import '../constants/colors.dart';
 import '../models/category.dart';
+import '../models/property_model.dart';
+import '../models/user_model.dart';
 import '../utils/screen_utils.dart';
-import '../widgets/custom_nav_bar.dart';
 import '../widgets/deal_card.dart';
 import '../widgets/indi_deal_card.dart';
 import '../widgets/tab_title.dart';
@@ -17,36 +23,104 @@ import './special_deal_screen.dart';
 import 'create_add_page_part1.dart';
 import 'dragon_fruit_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = '/home_screen';
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Property> properties = [];
+  late TutorialCoachMark tutorialCoachMark;
+  GlobalKey keyPos = GlobalKey();
+  GlobalKey keyTrans = GlobalKey();
+  GlobalKey keyBanking = GlobalKey();
+  GlobalKey keyCustomers = GlobalKey();
+  GlobalKey keySuppliers = GlobalKey();
+  GlobalKey keyInventory = GlobalKey();
+  GlobalKey keyAppBar = GlobalKey();
+  GlobalKey createAdd = GlobalKey();
+  bool showcoach = true;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadProperties();
+
+    // getCoach().then((value) {
+    //   print(value);
+    //   print("show coach " + value.toString());
+    //   if (value.toString() == 'null') {
+    //     createTutorial();
+    //     Future.delayed(Duration.zero, showTutorial);
+    //   }
+    //   else{
+    //     createTutorial();
+    //     Future.delayed(Duration.zero, showTutorial);
+    //   }
+    // });
+  }
+  void loadProperties() async {
+    try {
+      List<Property> loadedProperties = await ApiService.getProperties();
+      setState(() {
+        properties = loadedProperties;
+      });
+    } catch (error) {
+      // Handle error appropriately, e.g., show error message
+      print('Failed to load properties: $error');
+    }
+  }
+
+  Future<void> storeCoach(bool coach) async {
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("coach", coach);
+  }
+
+  getCoach() async {
+    var prefs = await SharedPreferences.getInstance();
+    var coach = prefs.getBool('coach');
+    return coach;
+  }
 
   @override
   Widget build(BuildContext context) {
     final List<Category> categories = [
       Category(
-        'For Leasing',
+        'Land',
         'assets/images/egg.png',
         kAccentYellow,
       ),
-
       Category(
-        'For sale',
+        'Private Land',
         'assets/images/drinks.png',
         kAccentPurple,
       ),
       Category(
-        'Residential',
+        'Commercial Land',
         'assets/images/cannedfood.png',
         kAccentTosca,
       ),
       Category(
-        'Commercial',
+        'House',
         'assets/images/dairy.png',
         kAccentGreen,
       ),
-
+      Category(
+        'Office Space',
+        'assets/images/dairy.png',
+        kAccentGreen,
+      ),
+      Category(
+        'Apartment',
+        'assets/images/dairy.png',
+        kAccentGreen,
+      ),
     ];
+
     ScreenUtils().init(context);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,14 +130,15 @@ class HomeScreen extends StatelessWidget {
           Spacer(),
           CategoryTab(categories: categories),
           Spacer(),
-          DealsTab(),
+          DealsTab(properties: properties),
           Spacer(),
-          PopularDealTab(),
+          PopularDealTab(properties: properties),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: RawMaterialButton(
         fillColor: Colors.white,
+        key: createAdd,
         shape: StadiumBorder(),
         elevation: 10.0,
         onPressed: () {
@@ -77,7 +152,7 @@ class HomeScreen extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('assets/images/create_post_icon.png',height: 30,),
+              Image.asset('assets/images/create_post_icon.png', height: 30),
               Text(
                 'Create add',
                 style: Theme.of(context).textTheme.headline4?.copyWith(
@@ -87,12 +162,123 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-      )
+      ),
     );
   }
+
+  //in app tutorial coach start
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
+  }
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: _createTargets(),
+      colorShadow: Colors.green,
+      textSkip: "SKIP",
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+      onFinish: () {
+        print("finish");
+
+      },
+      onClickTarget: (target) {
+        print('onClickTarget: $target');
+      },
+      onClickTargetWithTapPosition: (target, tapDetails) {
+        print("target: $target");
+        print(
+            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+      },
+      onClickOverlay: (target) {
+        print('onClickOverlay: $target');
+      },
+      onSkip: () {
+        print("skip");
+
+        showcoach = false;
+        storeCoach(showcoach);
+        print(showcoach);
+        return showcoach;
+      },
+    );
+  }
+
+  List<TargetFocus> _createTargets() {
+    List<TargetFocus> targets = [];
+
+
+
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation20",
+        keyTarget: createAdd,
+        alignSkip: Alignment.bottomRight,
+        color: kPrimaryGreen,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    "Create post",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      "This is where you add your listing to the app",
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Next"),
+                        ElevatedButton(
+                          onPressed: () {
+                            controller.next();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kAccentGreen, // set the background color here
+                          ),
+                          child: const Text("Next"),
+                        ),
+                      ]),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
+
+
+    return targets;
+  }
+
+// in app tutoial coach end
+
 }
 
-class PopularDealTab extends StatelessWidget {
+class PopularDealTab extends StatefulWidget {
+  final List<Property> properties;
+
+  PopularDealTab({required this.properties});
+  @override
+  State<PopularDealTab> createState() => _PopularDealTabState();
+}
+
+class _PopularDealTabState extends State<PopularDealTab> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -111,34 +297,17 @@ class PopularDealTab extends StatelessWidget {
                 childAspectRatio: 0.8,
                 crossAxisSpacing: getProportionateScreenWidth(8),
               ),
-              children: [
-                IndiDealCard(
-                  addHandler: (){
+              children: widget.properties.map((property) {
+                return IndiDealCard(
+                  addHandler: () {
                     print("Item tapped");
                   },
-                  isLeft: true,
-                  isSelected: true,
-                ),
-                IndiDealCard(
-                  isLeft: false,
-                  isSelected: false,
-                ),
-                IndiDealCard(
-                  isLeft: false,
-                  isSelected: false,
-                ),
-                IndiDealCard(
-                  addHandler: (){
-                    // Get.to()
-                  },
-                  isLeft: false,
-                  isSelected: false,
-                ),
-                IndiDealCard(
-                  isLeft: false,
-                  isSelected: false,
-                ),
-              ],
+                  isLeft: true, // Adjust as needed
+                  isSelected: true, // Adjust as needed
+                  property: property,
+                );
+              }).toList(),
+
             ),
           )
         ],
@@ -147,34 +316,41 @@ class PopularDealTab extends StatelessWidget {
   }
 }
 
-class DealsTab extends StatelessWidget {
+class DealsTab extends StatefulWidget {
+  final List<Property> properties;
+
+  DealsTab({required this.properties});
+
+  @override
+  State<DealsTab> createState() => _DealsTabState();
+}
+
+class _DealsTabState extends State<DealsTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TabTitle(
-            title: 'Newly posted',
-            seeAll: () {
-              Navigator.of(context).pushNamed(SpecialDealScreen.routeName);
-            }),
+          title: 'Newly posted',
+          seeAll: () {
+            // Navigator.of(context).pushNamed(SpecialDealScreen.routeName);
+          },
+        ),
         SizedBox(
           height: getProportionateScreenHeight(10),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: [
-              DealCard(onTap: (){
-                Get.to(DragonFruitScreen());
-              },),
-              DealCard(onTap: (){
-                Get.to(DragonFruitScreen());
-              },),
-              DealCard(onTap: (){
-                Get.to(DragonFruitScreen());
-              },),
-            ],
+            children: widget.properties.map((property) {
+              return DealCard(
+                property: property,
+                onTap: () {
+                  Get.to(DragonFruitScreen(property: property,));
+                },
+              );
+            }).toList(),
           ),
         ),
       ],
@@ -182,14 +358,22 @@ class DealsTab extends StatelessWidget {
   }
 }
 
-class CategoryTab extends StatelessWidget {
+
+class CategoryTab extends StatefulWidget {
   const CategoryTab({
     Key? key,
     required this.categories,
+    this.targetKey,
   }) : super(key: key);
 
   final List<Category> categories;
+  final GlobalKey? targetKey;
 
+  @override
+  State<CategoryTab> createState() => _CategoryTabState();
+}
+
+class _CategoryTabState extends State<CategoryTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -208,7 +392,7 @@ class CategoryTab extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(CategoryScreen.routeName);
+                  Get.to(CategoryScreen(categories: widget.categories,));
                 },
                 child: Text(
                   'See All',
@@ -216,11 +400,17 @@ class CategoryTab extends StatelessWidget {
               )
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              categories.length,
-              (index) => CategoryCard(categories[index]),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(
+                widget.categories.length,
+                    (index) => Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0), // Adjust the spacing here
+                  child: CategoryCard(widget.categories[index]),
+                ),
+              ),
             ),
           )
         ],
@@ -229,14 +419,32 @@ class CategoryTab extends StatelessWidget {
   }
 }
 
-class HomeAppBar extends StatelessWidget {
+class HomeAppBar extends StatefulWidget {
+  @override
+  _HomeAppBarState createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends State<HomeAppBar> {
+  late User _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserDetails();
+  }
+
+  Future<void> _getUserDetails() async {
+    User? user = await SharedPreferencesService.getUser();
+    setState(() {
+      _user = user ?? User(id: '', name: '', phone: '', email: '', idNumber: '', referralCode: '', password: '', otp: '', verified: '', createdAt: '', userCategory: ''); // If user is null, assign a default User object
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: getProportionateScreenWidth(
-          16,
-        ),
+        horizontal: getProportionateScreenWidth(16),
       ),
       child: Row(
         children: [
@@ -245,18 +453,16 @@ class HomeAppBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Test user',
+                  _user.name ?? 'Test User',
                   style: Theme.of(context).textTheme.headline4?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
-                  'Nairobi, Kenya',
+                  _user.userCategory ?? 'Nairobi, Kenya',
                   style: TextStyle(
                     color: kTextColorAccent,
-                    fontSize: getProportionateScreenWidth(
-                      12,
-                    ),
+                    fontSize: getProportionateScreenWidth(12),
                   ),
                 ),
               ],

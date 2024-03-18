@@ -6,12 +6,16 @@ class CustomTextField extends StatelessWidget {
   const CustomTextField({
     required this.hint,
     this.icon,
+    this.controller,
   });
   final String hint;
   final Widget? icon;
+  final TextEditingController? controller;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(

@@ -5,55 +5,39 @@ import '../utils/screen_utils.dart';
 import '../widgets/category_card.dart';
 import '../widgets/custom_app_bar.dart';
 
-class CategoryScreen extends StatelessWidget {
+class CategoryScreen extends StatefulWidget {
   static const routeName = '/category_screen';
+  final List<Category> categories;
+
+  CategoryScreen({required this.categories});
+
+
+  @override
+  State<CategoryScreen> createState() => _CategoryScreenState();
+}
+
+class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
-    final List<Category> categories = [
-      Category(
-        'For Leasing',
-        'assets/images/egg.png',
-        kAccentYellow,
-      ),
 
-      Category(
-        'For sale',
-        'assets/images/drinks.png',
-        kAccentPurple,
-      ),
-      Category(
-        'Residential',
-        'assets/images/cannedfood.png',
-        kAccentTosca,
-      ),
-      Category(
-        'Commercial',
-        'assets/images/dairy.png',
-        kAccentGreen,
-      ),
-      Category(
-        'verified',
-        'assets/images/cereal.png',
-        kAccentRed,
-      ),
-    ];
     ScreenUtils().init(context);
     return Scaffold(
+      appBar: AppBar(title: Text("Filter Properies by Category"),),
       body: SafeArea(
         child: Column(
           children: [
-            CustomAppBar(
-              'Categories',
-              [
-                Icon(
-                  Icons.search,
-                  color: kPrimaryGreen,
-                ),
-                SizedBox(
-                  width: getProportionateScreenWidth(16),
-                ),
-              ],
-            ),
+            // CustomAppBar(
+            //   'Categories',
+            //   [
+            //     Icon(
+            //       Icons.search,
+            //       color: kPrimaryGreen,
+            //     ),
+            //     SizedBox(
+            //       width: getProportionateScreenWidth(16),
+            //     ),
+            //   ],
+            // ),
             SizedBox(
               height: getProportionateScreenHeight(50),
             ),
@@ -63,9 +47,9 @@ class CategoryScreen extends StatelessWidget {
                 crossAxisCount: 3,
               ),
               children: List.generate(
-                categories.length,
+                widget.categories.length,
                 (index) => CategoryCard(
-                  categories[index],
+                  widget.categories[index],
                 ),
               ),
             ))

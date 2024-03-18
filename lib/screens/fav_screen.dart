@@ -1,17 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../api/api_service.dart';
 import '../constants/colors.dart';
 import '../models/item.dart';
+import '../models/property_model.dart';
 import '../utils/screen_utils.dart';
 import '../widgets/indi_deal_card.dart';
 import '../widgets/list_card.dart';
 import '../widgets/tab_title.dart';
 
-class FavScreen extends StatelessWidget {
+class FavScreen extends StatefulWidget {
   final Function()? setstateCallback;
 
   const FavScreen(this.setstateCallback);
 
+  @override
+  State<FavScreen> createState() => _FavScreenState();
+}
+
+class _FavScreenState extends State<FavScreen> {
+  List<Property> properties = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadProperties();
+  }
+  void loadProperties() async {
+    try {
+      List<Property> loadedProperties = await ApiService.getProperties();
+      setState(() {
+        properties = loadedProperties;
+      });
+    } catch (error) {
+      // Handle error appropriately, e.g., show error message
+      print('Failed to load properties: $error');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     List<Widget> emptyCartWidgets = [
@@ -57,7 +82,7 @@ class FavScreen extends StatelessWidget {
         height: getProportionateScreenHeight(16.0),
       ),
       ElevatedButton(
-        onPressed: setstateCallback,
+        onPressed: widget.setstateCallback,
         child: Text(
           'Start Shopping',
         ),
@@ -72,23 +97,16 @@ class FavScreen extends StatelessWidget {
       SizedBox(
         height: getProportionateScreenHeight(220),
         child: Row(
-          children: [
-            Expanded(
-              child: IndiDealCard(
-                noPadding: true,
-                isSelected: true,
-              ),
-            ),
-            SizedBox(
-              width: getProportionateScreenWidth(8),
-            ),
-            Expanded(
-              child: IndiDealCard(
-                noPadding: true,
-                isSelected: false,
-              ),
-            ),
-          ],
+          children: properties.map((property) {
+            return IndiDealCard(
+              addHandler: () {
+                print("Item tapped");
+              },
+              isLeft: true, // Adjust as needed
+              isSelected: true, // Adjust as needed
+              property: property,
+            );
+          }).toList()
         ),
       ),
     ];

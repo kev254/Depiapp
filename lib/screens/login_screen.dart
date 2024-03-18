@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../api/api_service.dart';
 import '../screens/tab_screen.dart';
 import '../screens/home_screen.dart';
 
@@ -11,8 +12,25 @@ import '../widgets/option_button.dart';
 import '../widgets/or_row.dart';
 import '../widgets/social_media.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const routeName = '/loginScreen';
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  bool isLoading=false;
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     ScreenUtils().init(context);
@@ -21,7 +39,8 @@ class LoginScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BackButtonLS(),
+          // BackButtonLS(),
+          SizedBox(height: 30,),
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -46,7 +65,22 @@ class LoginScreen extends StatelessWidget {
                   Spacer(),
                   // OrRow(),
                   Spacer(),
-                  TextFields(),
+                  Column(
+                    children: [
+                      CustomTextField(
+                        controller: emailController,
+                        hint: 'Email Address',
+                      ),
+                      SizedBox(
+                        height: getProportionateScreenHeight(16),
+                      ),
+                      CustomTextField(
+                        hint: 'Password',
+                        controller: passwordController,
+                        icon: Image.asset('assets/images/hide_icon.png'),
+                      ),
+                    ],
+                  ),
                   Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -63,10 +97,16 @@ class LoginScreen extends StatelessWidget {
                   Spacer(),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pushNamed(TabScreen.routeName);
+                      setState(() {
+                        isLoading = true;
+                      });
+                      login();
                     },
-                    child: Text('Login'),
+                    child: isLoading
+                        ? CircularProgressIndicator()
+                        : Text('Login'),
                   ),
+
                   Spacer(
                     flex: 4,
                   ),
@@ -86,28 +126,14 @@ class LoginScreen extends StatelessWidget {
       ),
     ));
   }
-}
 
-class TextFields extends StatelessWidget {
-  const TextFields({
-    Key? key,
-  }) : super(key: key);
+  void login() {
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CustomTextField(
-          hint: 'Email Address',
-        ),
-        SizedBox(
-          height: getProportionateScreenHeight(16),
-        ),
-        CustomTextField(
-          hint: 'Password',
-          icon: Image.asset('assets/images/hide_icon.png'),
-        ),
-      ],
-    );
+    String email = emailController.text;
+    String password = passwordController.text;
+
+    ApiService.login(context,email,  password);
   }
 }
+
+

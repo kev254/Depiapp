@@ -37,22 +37,22 @@ class SpecialDealScreen extends StatelessWidget {
                   horizontal: getProportionateScreenWidth(16.0),
                 ),
                 children: [
-                  DealCard(
-                    onTap: () {
-                      Navigator.of(context)
-                          .pushNamed(SpecialDealChildScreen.routeName);
-                    },
-                    isHorizontalScrolling: false,
-                  ),
-                  DealCard(
-                    isHorizontalScrolling: false,
-                  ),
-                  DealCard(
-                    isHorizontalScrolling: false,
-                  ),
-                  DealCard(
-                    isHorizontalScrolling: false,
-                  ),
+                  // DealCard(
+                  //   onTap: () {
+                  //     Navigator.of(context)
+                  //         .pushNamed(SpecialDealChildScreen.routeName);
+                  //   },
+                  //   isHorizontalScrolling: false,
+                  // ),
+                  // DealCard(
+                  //   isHorizontalScrolling: false,
+                  // ),
+                  // DealCard(
+                  //   isHorizontalScrolling: false,
+                  // ),
+                  // DealCard(
+                  //   isHorizontalScrolling: false,
+                  // ),
                 ],
               ),
             ),

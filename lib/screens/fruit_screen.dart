@@ -62,8 +62,7 @@ class _FruitScreenState extends State<FruitScreen> {
             SizedBox(
               height: getProportionateScreenHeight(16.0),
             ),
-            Expanded(
-              child: ImagePlaceholder(),
+            Expanded(child: ImagePlaceholder(image_url: "",),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -89,7 +88,7 @@ class _FruitScreenState extends State<FruitScreen> {
                       ),
                       Row(
                         children: [
-                          PriceTag(),
+                          PriceTag(price: "400",),
                           Spacer(),
                           CustomIconButton(Icons.remove, () {
                             setState(() {

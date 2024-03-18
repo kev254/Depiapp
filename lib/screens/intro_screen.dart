@@ -47,17 +47,17 @@ class TextView extends StatelessWidget {
       {
         'title': 'Create plot add',
         'desc':
-            'Expand your real estate reach with Create add. Reach potential clients effortlessly by showcasing your unique plots. Connect, engage, and grow your network seamlessly',
+        'Expand your real estate reach with Create add. Reach potential clients effortlessly by showcasing your unique plots. Connect, engage, and grow your network seamlessly',
       },
       {
         'title': 'Browse our avaialable plots',
         'desc':
-            'Simplify property hunting with Browse Our Plots. Explore, order, and purchase your ideal plot seamlessly from the comfort of your home',
+        'Simplify property hunting with Browse Our Plots. Explore, order, and purchase your ideal plot seamlessly from the comfort of your home',
       },
       {
         'title': 'Get in contact with seller',
         'desc':
-            'Connect directly with sellers through Get in Contact. Swiftly communicate, finalize transactions, and make your real estate dreams a reality!',
+        'Connect directly with sellers through Get in Contact. Swiftly communicate, finalize transactions, and make your real estate dreams a reality!',
       },
 
     ];
@@ -73,9 +73,9 @@ class TextView extends StatelessWidget {
             Text(
               data[pageCount]['title']!,
               style: Theme.of(context).textTheme.headline3?.copyWith(
-                    color: kTextColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: kTextColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Spacer(),
             Text(
@@ -148,9 +148,9 @@ class IllustrationPageView extends StatelessWidget {
   final Function(int) callback;
 
   const IllustrationPageView(
-    this.controller,
-    this.callback,
-  );
+      this.controller,
+      this.callback,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -175,8 +175,8 @@ class IllustrationPageView extends StatelessWidget {
                   child: Text(
                     'Skip',
                     style: Theme.of(context).textTheme.headline4?.copyWith(
-                          color: kTextColor,
-                        ),
+                      color: kTextColor,
+                    ),
                   ),
                 ),
                 SizedBox(

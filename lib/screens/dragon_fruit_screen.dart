@@ -1,6 +1,17 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:depi/api/api_endpoints.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../api/api_service.dart';
+import '../api/pdf_viewer.dart';
 import '../constants/colors.dart';
+import '../models/property_model.dart';
 import '../screens/order_summary_screen.dart';
 import '../utils/screen_utils.dart';
 import '../widgets/custom_app_bar.dart';
@@ -12,9 +23,14 @@ import '../widgets/indi_deal_card.dart';
 import '../widgets/price_tag.dart';
 import '../widgets/quantity_input.dart';
 import '../widgets/tab_title.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
 
 class DragonFruitScreen extends StatefulWidget {
   static const routeName = '/dragonFruit';
+  final Property property;
+
+  DragonFruitScreen({required this.property});
 
   @override
   _DragonFruitScreenState createState() => _DragonFruitScreenState();
@@ -23,9 +39,31 @@ class DragonFruitScreen extends StatefulWidget {
 class _DragonFruitScreenState extends State<DragonFruitScreen> {
   final textController = TextEditingController(text: '1');
   bool isReviewTab = false;
+  List<Property> properties = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadProperties();
+  }
+  void loadProperties() async {
+    try {
+      List<Property> loadedProperties = await ApiService.getProperties();
+      setState(() {
+        properties = loadedProperties;
+      });
+    } catch (error) {
+      // Handle error appropriately, e.g., show error message
+      print('Failed to load properties: $error');
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text(widget.property.title,),),
       body: SafeArea(
         child: Column(
           children: [
@@ -34,35 +72,35 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomAppBar(
-                      'Juja Plots for sale ',
-                      [
-                        // SizedBox(
-                        //   width: getProportionateScreenWidth(24),
-                        //   child: Image.asset(
-                        //     'assets/images/cart_nav_fill.png',
-                        //     fit: BoxFit.cover,
-                        //   ),
-                        // ),
-                        SizedBox(
-                          width: getProportionateScreenWidth(16),
-                        ),
-                        Icon(
-                          Icons.share,
-                          color: kPrimaryGreen,
-                        ),
-                        SizedBox(
-                          width: getProportionateScreenWidth(16),
-                        ),
-                      ],
-                    ),
+                    // CustomAppBar(
+                    //   widget.property.title,
+                    //   [
+                    //     // SizedBox(
+                    //     //   width: getProportionateScreenWidth(24),
+                    //     //   child: Image.asset(
+                    //     //     'assets/images/cart_nav_fill.png',
+                    //     //     fit: BoxFit.cover,
+                    //     //   ),
+                    //     // ),
+                    //     SizedBox(
+                    //       width: getProportionateScreenWidth(16),
+                    //     ),
+                    //     Icon(
+                    //       Icons.share,
+                    //       color: kPrimaryGreen,
+                    //     ),
+                    //     SizedBox(
+                    //       width: getProportionateScreenWidth(16),
+                    //     ),
+                    //   ],
+                    // ),
                     SizedBox(
                       height: getProportionateScreenHeight(10),
                     ),
                     SizedBox(
                       height: getProportionateScreenHeight(300),
                       width: double.infinity,
-                      child: ImagePlaceholder(),
+                      child: ImagePlaceholder(image_url: widget.property.filesData[0].photoUrl,),
                     ),
                     SizedBox(
                       height: getProportionateScreenHeight(10),
@@ -78,12 +116,12 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                           SizedBox(
                             height: getProportionateScreenHeight(8),
                           ),
-                          FruitTitle(title: 'Juja Plots for sale'),
+                          FruitTitle(title: widget.property.title),
                           SizedBox(
                             height: getProportionateScreenHeight(8),
                           ),
                           Text(
-                            'Juja',
+                            widget.property.geolocation,
                             style:
                                 Theme.of(context).textTheme.headline4?.copyWith(
                                       color: kTextColorAccent,
@@ -97,29 +135,9 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                               // SizedBox(
                               //   width: getProportionateScreenWidth(8),
                               // ),
-                              PriceTag(),
+                              PriceTag(price: widget.property.price,),
                               Spacer(),
-                              // CustomIconButton(Icons.remove, () {
-                              //   setState(() {
-                              //     int quantity = int.parse(textController.text);
-                              //     quantity--;
-                              //     textController.text = quantity.toString();
-                              //   });
-                              // }),
-                              // SizedBox(
-                              //   width: getProportionateScreenWidth(4),
-                              // ),
-                              // QuantityInput(textController: textController),
-                              // SizedBox(
-                              //   width: getProportionateScreenWidth(4),
-                              // ),
-                              // CustomIconButton(Icons.add, () {
-                              //   setState(() {
-                              //     int quantity = int.parse(textController.text);
-                              //     quantity++;
-                              //     textController.text = quantity.toString();
-                              //   });
-                              // }),
+
                             ],
                           ),
                           SizedBox(
@@ -190,7 +208,7 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                           ),
                           !isReviewTab
                               ? Text(
-                                  '50x100 plot for sale at opposite kimumu primary. The plot has a ready title deed, electricity and piped water. 250 meters from Kimumu secondary tarmac',
+                                  widget.property.description,
                                   style: Theme.of(context)
                                       .textTheme
                                       .headline4
@@ -201,13 +219,36 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                               : Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
-                                  children: [
-                                    ReviewCard(title: "Title dead"),
-                                    ReviewCard(title: "Land search "),
-                                    // OutlinedButton(
-                                    //     onPressed: () {},
-                                    //     child: Text('See All Reviews'))
-                                  ],
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Get.to(PDFViewer(pdfUrl:ApiEndpoints.upload_url+widget.property.filesData[0].titleDealUrl, documents_name: 'Title Deed',));
+                                  // _openPDFPreview(ApiEndpoints.upload_url+"receipt.pdf");
+                                },
+                                child: ReviewCard(
+                                  title: "Title deed",
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                  // showFile(ApiEndpoints.upload_url+"receipt.pdf");
+                                  Get.to(PDFViewer(pdfUrl:ApiEndpoints.upload_url+widget.property.filesData[0].surveyorSearchUrl, documents_name: 'Surveyor search',));
+                                },
+                                child: ReviewCard(
+                                  title: "Surveyor search",
+
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                  Get.to(PDFViewer(pdfUrl:ApiEndpoints.upload_url+widget.property.filesData[0].propertyMapUrl, documents_name: 'Surveyor Map',));
+                                },
+                                child: ReviewCard(
+                                  title: "Surveyor Map",
+
+                                ),
+                              ),
+                            ],
                                 ),
                           Divider(
                             height: getProportionateScreenHeight(48),
@@ -218,24 +259,18 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                           ),
                           SizedBox(
                             height: getProportionateScreenHeight(220),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: IndiDealCard(
-                                    noPadding: true,
-                                    isSelected: true,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: getProportionateScreenWidth(8),
-                                ),
-                                Expanded(
-                                  child: IndiDealCard(
-                                    noPadding: true,
-                                    isSelected: false,
-                                  ),
-                                ),
-                              ],
+                            child: GridView.count(
+                              crossAxisCount: 2,
+                              children: properties.map((property) {
+                                return IndiDealCard(
+                                  addHandler: () {
+                                    Get.to(DragonFruitScreen(property: property,));
+                                  },
+                                  isLeft: true, // Adjust as needed
+                                  isSelected: true, // Adjust as needed
+                                  property: property,
+                                );
+                              }).toList(),
                             ),
                           ),
                           SizedBox(
@@ -275,7 +310,9 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                   Expanded(
                     flex: 4,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await launch('tel:'+widget.property.user.phone);
+                      },
                       child: Text('Contact Seller'),
                     ),
                   ),
@@ -287,6 +324,9 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
       ),
     );
   }
+
+
+
 }
 
 class ReviewCard extends StatelessWidget {
