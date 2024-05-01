@@ -1,4 +1,4 @@
-package com.example.depi
+package tiro.depi.real.estate
 
 import io.flutter.embedding.android.FlutterActivity
 

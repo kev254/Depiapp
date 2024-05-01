@@ -22,12 +22,12 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   List<Property> properties = [];
-  TextEditingController seratchctrl= TextEditingController();
+  TextEditingController searchCtrl = TextEditingController();
   bool isAdded = false;
+  bool isLoading = true; // New boolean to track loading state
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadProperties();
   }
@@ -37,30 +37,30 @@ class _SearchScreenState extends State<SearchScreen> {
       List<Property> loadedProperties = await ApiService.getProperties();
       setState(() {
         properties = loadedProperties;
+        isLoading = false; // Update loading state when properties are loaded
       });
     } catch (error) {
-      // Handle error appropriately, e.g., show error message
       print('Failed to load properties: $error');
     }
   }
+
   void loadSearchProperties() async {
     try {
-      List<Property> loadedProperties = await ApiService.getPropertiesBySearchKey(seratchctrl.text);
+      List<Property> loadedProperties =
+      await ApiService.getPropertiesBySearchKey(searchCtrl.text);
       setState(() {
         properties = loadedProperties;
       });
     } catch (error) {
-      // Handle error appropriately, e.g., show error message
       print('Failed to load properties: $error');
     }
   }
 
   @override
-
   Widget build(BuildContext context) {
     ScreenUtils().init(context);
     return Scaffold(
-      appBar: AppBar(title: Text("Search Property"),),
+      appBar: AppBar(title: Text("Search Property")),
       body: Stack(
         children: [
           SafeArea(
@@ -68,51 +68,54 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Row(children: [
-                                  Expanded(
-                                    child: SearchBar(
-                                      controller: seratchctrl,
-                                      hintText: "I'm looking for....",
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: getProportionateScreenWidth(10),
-                                  ),
-                                  GestureDetector(
-                                    onTap: (){
-                                      //perform search
-                                      print(seratchctrl.text);
-                                      if(seratchctrl.text==null || seratchctrl.text==""){
-                                        // SnackBar(content: Text("Search value cannot be empty"));
-                                        showSnackbar(title: 'Error !', subtitle: "Search value cannot be empty ");
-                                      }
-                                      else{
-                                        loadSearchProperties();
-                                      }
-
-                                    },
-                                      child: Image.asset(
-                                    'assets/images/arrow_forward.png',
-                                    height: 50,
-                                    width: 30,
-                                  )),
-                                ]),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SearchBar(
+                          controller: searchCtrl,
+                          hintText: "I'm looking for....",
+                        ),
+                      ),
+                      SizedBox(width: getProportionateScreenWidth(10)),
+                      GestureDetector(
+                        onTap: () {
+                          if (searchCtrl.text == null ||
+                              searchCtrl.text == "") {
+                            showSnackbar(
+                              title: 'Error !',
+                              subtitle: "Search value cannot be empty ",
+                            );
+                          } else {
+                            loadSearchProperties();
+                          }
+                        },
+                        child: Image.asset(
+                          'assets/images/arrow_forward.png',
+                          height: 50,
+                          width: 30,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                CustomStaggerGrid(() {
+                isLoading
+                    ? Center(
+                  child: CircularProgressIndicator(),
+                )
+                    : CustomStaggerGrid(() {
                   setState(() {
                     isAdded = true;
                   });
-                },properties),
+                }, properties),
               ],
             ),
           ),
-
         ],
       ),
-
     );
   }
 }
+
 
 class CustomStaggerGrid extends StatelessWidget {
   final Function()? addCallback;

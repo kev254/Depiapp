@@ -10,6 +10,9 @@ import '../widgets/custom_app_bar.dart';
 
 class PopularDealsScreen extends StatefulWidget {
   static const routeName = '/popular_deals';
+  final String? widget_appbarr;
+
+  const PopularDealsScreen({super.key, this.widget_appbarr});
 
   @override
   _PopularDealsScreenState createState() => _PopularDealsScreenState();
@@ -18,50 +21,57 @@ class PopularDealsScreen extends StatefulWidget {
 class _PopularDealsScreenState extends State<PopularDealsScreen> {
   bool isAdded = false;
   List<Property> properties = [];
+  bool isLoading = true; // New boolean to track loading state
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadProperties();
   }
+
   void loadProperties() async {
     try {
       List<Property> loadedProperties = await ApiService.getProperties();
       setState(() {
         properties = loadedProperties;
+        isLoading = false; // Update loading state when properties are loaded
       });
     } catch (error) {
-      // Handle error appropriately, e.g., show error message
       print('Failed to load properties: $error');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtils().init(context);
     return Scaffold(
-      appBar: AppBar(title: Text("Top rated properties"),),
+      appBar: AppBar(
+        title: Text(widget.widget_appbarr ?? ""),
+      ),
       body: Stack(
         children: [
           SafeArea(
             child: Column(
               children: [
-
-                SizedBox(height: 20,),
-                CustomStaggerGrid(() {
+                SizedBox(height: 20),
+                isLoading
+                    ? Center(
+                  child: CircularProgressIndicator(), // Show CircularProgressIndicator while loading
+                )
+                    : CustomStaggerGrid(() {
                   setState(() {
                     isAdded = true;
                   });
-                },properties),
+                }, properties),
               ],
             ),
           ),
-
         ],
       ),
-
     );
   }
 }
+
 
 class CustomStaggerGrid extends StatelessWidget {
   final Function()? addCallback;

@@ -3,6 +3,7 @@ import '../api/api_service.dart';
 import '../screens/tab_screen.dart';
 import '../screens/home_screen.dart';
 
+import '../widgets/password_text_field.dart';
 import './signup_screen.dart';
 import '../constants/colors.dart';
 import '../utils/screen_utils.dart';
@@ -74,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         height: getProportionateScreenHeight(16),
                       ),
-                      CustomTextField(
+                      PasswordTextField(
                         hint: 'Password',
                         controller: passwordController,
                         icon: Image.asset('assets/images/hide_icon.png'),
@@ -82,18 +83,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: kPrimaryGreen,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     Text(
+                  //       'Forgot Password?',
+                  //       style: TextStyle(
+                  //         color: kPrimaryGreen,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   Spacer(),
                   ElevatedButton(
                     onPressed: () {

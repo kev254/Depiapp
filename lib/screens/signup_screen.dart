@@ -11,6 +11,7 @@ import '../widgets/custom_radio_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/option_button.dart';
 import '../widgets/or_row.dart';
+import '../widgets/password_text_field.dart';
 import '../widgets/snackbar.dart';
 import '../widgets/social_media.dart';
 
@@ -131,13 +132,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     Spacer(),
                     CustomTextField(hint: 'Referal code', controller: referalCodeController,),
                     Spacer(),
-                    CustomTextField(
+                    PasswordTextField(
                       hint: 'Password',
                       icon: Image.asset('assets/images/hide_icon.png'),
                       controller: passwordController,
                     ),
                     Spacer(),
-                    CustomTextField(
+                    PasswordTextField(
                       hint: 'Confirm password',
                       icon: Image.asset('assets/images/hide_icon.png'),
                       controller: confirmPasswordController,

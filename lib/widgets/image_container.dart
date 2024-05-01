@@ -15,24 +15,28 @@ class ImageContainer extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            decoration: ShapeDecoration(
-              shape: CircleBorder(),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
               color: kGreyShade5,
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              padding: EdgeInsets.all(
-                getProportionateScreenWidth(8),
+              image: DecorationImage(
+                image: NetworkImage('https://cdn.pixabay.com/photo/2014/04/03/10/44/avatar-311292_1280.png'),
+                fit: BoxFit.contain, // Adjust this based on your requirement
               ),
-              decoration: ShapeDecoration(
-                shape: CircleBorder(),
-                color: kPrimaryGreen,
-              ),
-              child: Image.asset('assets/images/camera.png'),
             ),
           )
+          // Align(
+          //   alignment: Alignment.bottomRight,
+          //   child: Container(
+          //     padding: EdgeInsets.all(
+          //       getProportionateScreenWidth(8),
+          //     ),
+          //     decoration: ShapeDecoration(
+          //       shape: CircleBorder(),
+          //       color: kPrimaryGreen,
+          //     ),
+          //     child: Image.asset('assets/images/camera.png'),
+          //   ),
+          // )
         ],
       ),
     );

@@ -21,48 +21,49 @@ class CategoryPostScreen extends StatefulWidget {
 class _CategoryPostScreenState extends State<CategoryPostScreen> {
   bool isAdded = false;
   List<Property> properties = [];
+  bool isLoading = true; // New boolean to track loading state
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadProperties();
   }
+
   void loadProperties() async {
     try {
-      List<Property> loadedProperties = await ApiService.getPropertiesByCategoryName(widget.category_name);
+      List<Property> loadedProperties =
+      await ApiService.getPropertiesByCategoryName(widget.category_name);
       setState(() {
         properties = loadedProperties;
+        isLoading = false; // Update loading state when properties are loaded
       });
     } catch (error) {
-      // Handle error appropriately, e.g., show error message
       print('Failed to load properties: $error');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtils().init(context);
     return Scaffold(
-      appBar:  AppBar(title: Text(widget.category_name,),),
+      appBar: AppBar(
+        title: Text(widget.category_name),
+      ),
       body: Stack(
         children: [
           SafeArea(
             child: Column(
               children: [
-                // CustomAppBar(
-                //   widget.category_name,
-                //   [
-                //
-                //     SizedBox(
-                //       width: getProportionateScreenWidth(16),
-                //     ),
-                //   ],
-                // ),
-                SizedBox(height: 20,),
-                CustomStaggerGrid(() {
+                SizedBox(height: 20),
+                isLoading
+                    ? Center(
+                  child: CircularProgressIndicator(), // Show CircularProgressIndicator while loading
+                )
+                    : CustomStaggerGrid(() {
                   setState(() {
                     isAdded = true;
                   });
-                },properties),
+                }, properties),
               ],
             ),
           ),
@@ -106,8 +107,7 @@ class _CategoryPostScreenState extends State<CategoryPostScreen> {
                         children: [
                           Text(
                             '5 items',
-                            style:
-                            Theme.of(context).textTheme.headline4?.copyWith(
+                            style: Theme.of(context).textTheme.headline4?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
@@ -141,10 +141,10 @@ class _CategoryPostScreenState extends State<CategoryPostScreen> {
             )
         ],
       ),
-
     );
   }
 }
+
 
 class CustomStaggerGrid extends StatelessWidget {
   final Function()? addCallback;

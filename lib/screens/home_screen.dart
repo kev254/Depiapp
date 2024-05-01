@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:depi/api/api_service.dart';
+import 'package:depi/screens/support_screen.dart';
+import 'package:depi/screens/tab_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,30 +44,21 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey keyAppBar = GlobalKey();
   GlobalKey createAdd = GlobalKey();
   bool showcoach = true;
+  bool isLoaded = false;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     loadProperties();
-
-    // getCoach().then((value) {
-    //   print(value);
-    //   print("show coach " + value.toString());
-    //   if (value.toString() == 'null') {
-    //     createTutorial();
-    //     Future.delayed(Duration.zero, showTutorial);
-    //   }
-    //   else{
-    //     createTutorial();
-    //     Future.delayed(Duration.zero, showTutorial);
-    //   }
-    // });
   }
+
   void loadProperties() async {
     try {
       List<Property> loadedProperties = await ApiService.getProperties();
       setState(() {
         properties = loadedProperties;
+        isLoaded = true;
       });
     } catch (error) {
       // Handle error appropriately, e.g., show error message
@@ -73,16 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> storeCoach(bool coach) async {
-    var prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("coach", coach);
-  }
 
-  getCoach() async {
-    var prefs = await SharedPreferences.getInstance();
-    var coach = prefs.getBool('coach');
-    return coach;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +114,15 @@ class _HomeScreenState extends State<HomeScreen> {
           Spacer(),
           CategoryTab(categories: categories),
           Spacer(),
-          DealsTab(properties: properties),
+          isLoaded
+              ? DealsTab(properties: properties)
+              : Center(child: CircularProgressIndicator()),
           Spacer(),
-          PopularDealTab(properties: properties),
+          // Show progress indicator or popular deals tab based on loading status
+          isLoaded
+              ? PopularDealTab(properties: properties)
+              : Center(child: CircularProgressIndicator()),
+          Spacer(),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -197,7 +187,6 @@ class _HomeScreenState extends State<HomeScreen> {
         print("skip");
 
         showcoach = false;
-        storeCoach(showcoach);
         print(showcoach);
         return showcoach;
       },
@@ -288,7 +277,8 @@ class _PopularDealTabState extends State<PopularDealTab> {
           TabTitle(
               title: 'Top rated',
               seeAll: () {
-                Navigator.of(context).pushNamed(PopularDealsScreen.routeName);
+                Get.to(PopularDealsScreen( widget_appbarr: "Top rated",));
+
               }),
           Expanded(
             child: GridView(
@@ -334,7 +324,7 @@ class _DealsTabState extends State<DealsTab> {
         TabTitle(
           title: 'Newly posted',
           seeAll: () {
-            // Navigator.of(context).pushNamed(SpecialDealScreen.routeName);
+            Get.to(PopularDealsScreen( widget_appbarr: "Newly Posted",));
           },
         ),
         SizedBox(
@@ -446,38 +436,44 @@ class _HomeAppBarState extends State<HomeAppBar> {
       padding: EdgeInsets.symmetric(
         horizontal: getProportionateScreenWidth(16),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _user.name ?? 'Test User',
-                  style: Theme.of(context).textTheme.headline4?.copyWith(
-                    fontWeight: FontWeight.w700,
+      child: GestureDetector(
+        onTap: (){
+          Get.to(UserScreen());
+
+        },
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _user.name ?? 'Test User',
+                    style: Theme.of(context).textTheme.headline4?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                Text(
-                  _user.userCategory ?? 'Nairobi, Kenya',
-                  style: TextStyle(
-                    color: kTextColorAccent,
-                    fontSize: getProportionateScreenWidth(12),
+                  Text(
+                    _user.userCategory ?? 'Nairobi, Kenya',
+                    style: TextStyle(
+                      color: kTextColorAccent,
+                      fontSize: getProportionateScreenWidth(12),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed(SearchScreen.routeName);
-            },
-            child: Icon(
-              Icons.search,
-              color: kPrimaryGreen,
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushNamed(SearchScreen.routeName);
+              },
+              child: Icon(
+                Icons.search,
+                color: kPrimaryGreen,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

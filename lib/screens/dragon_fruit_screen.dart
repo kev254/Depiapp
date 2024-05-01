@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:depi/api/api_endpoints.dart';
+import 'package:depi/screens/popular_deals_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -256,6 +257,9 @@ class _DragonFruitScreenState extends State<DragonFruitScreen> {
                           TabTitle(
                             title: 'More Like this',
                             padding: 0,
+                            seeAll: (){
+                              Get.to(PopularDealsScreen(widget_appbarr: "All Listings",));
+                            },
                           ),
                           SizedBox(
                             height: getProportionateScreenHeight(220),

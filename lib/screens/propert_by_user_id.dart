@@ -22,47 +22,54 @@ class _UserPostScreenState extends State<UserPostScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadProperties();
   }
+
   void loadProperties() async {
     try {
       List<Property> loadedProperties = await ApiService.getPropertiesByUserId();
       setState(() {
         properties = loadedProperties;
-        isLoaded=true;
+        isLoaded = true;
       });
     } catch (error) {
-      // Handle error appropriately, e.g., show error message
       print('Failed to load properties: $error');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtils().init(context);
     return Scaffold(
-      appBar: AppBar(title: Text("My properties"),),
+      appBar: AppBar(title: Text("My properties")),
       body: Stack(
         children: [
           SafeArea(
             child: Column(
               children: [
-                CustomStaggerGrid(() {
-                  setState(() {
-                    isAdded = true;
-                  });
-                },properties),
+                if (!isLoaded)
+                  Center(
+                    child: CircularProgressIndicator(),
+                  )
+                else
+                  CustomStaggerGrid(
+                        () {
+                      setState(() {
+                        isAdded = true;
+                      });
+                    },
+                    properties,
+                  ),
               ],
             ),
           ),
-
         ],
       ),
-
     );
   }
 }
+
 
 class CustomStaggerGrid extends StatelessWidget {
   final Function()? addCallback;
